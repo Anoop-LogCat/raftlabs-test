@@ -1,7 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { CsvParser, ParsedData } from 'nest-csv-parser';
 import * as fs from 'fs';
-import * as json2csv from 'json2csv';
 import { join } from 'path';
 import { Books } from './schema/book.schema';
 import { Magazines } from './schema/magazines.schema';
