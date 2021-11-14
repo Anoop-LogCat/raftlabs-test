@@ -5,17 +5,95 @@ import {
   Param,
   Post,
   Query,
+  Render,
+  Res,
   ValidationPipe,
 } from '@nestjs/common';
+import * as Handlebars from 'handlebars';
 import { ParsedData } from 'nest-csv-parser';
+import { join } from 'path';
 import { AppService } from './app.service';
 import { WorkDto } from './dto/work.dto';
+import { Authors } from './schema/author.schema';
 import { Books } from './schema/book.schema';
 import { Magazines } from './schema/magazines.schema';
+import { partialConversion } from './utils/partial-converison.util';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) {
+    const path = join(__dirname, '..', 'views');
+    Handlebars.registerPartial('header', partialConversion(path, 'header.hbs'));
+    Handlebars.registerPartial(
+      'books',
+      partialConversion(path, 'partials/books.hbs'),
+    );
+    Handlebars.registerPartial(
+      'magazines',
+      partialConversion(path, 'partials/magazines.hbs'),
+    );
+    Handlebars.registerPartial(
+      'authors',
+      partialConversion(path, 'partials/authors.hbs'),
+    );
+    Handlebars.registerPartial(
+      'authorWorks',
+      partialConversion(path, 'partials/works.hbs'),
+    );
+    Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+      return arg1 == arg2 ? options.fn(this) : options.inverse(this);
+    });
+  }
+
+  @Get('/')
+  @Render('index.hbs')
+  async indexPage(@Res() res) {
+    return res.status(302).redirect('/pages/home/Books');
+  }
+
+  @Get('pages/home/:pageId')
+  @Render('home.hbs')
+  async homePage(@Param('pageId') pageId: string, @Res() res, @Query() query) {
+    if (pageId === 'Books') {
+      const books = (await this.appService.getBooks()).list;
+      return {
+        pageId,
+        title: 'Home | Books',
+        payload: books,
+      };
+    } else if (pageId === 'Magazines') {
+      const magazines = (await this.appService.getMagazines()).list;
+      return {
+        pageId,
+        title: 'Home | Magazines',
+        payload: magazines,
+      };
+    } else if (pageId === 'Authors') {
+      if (query.email !== undefined) {
+        const works = await this.appService.getWorksByAuthor(query.email);
+        return {
+          pageId: 'Works',
+          title: 'Author Works',
+          payload: works,
+        };
+      } else {
+        const authors = (await this.appService.getAuthors()).list;
+        return {
+          pageId,
+          title: 'Home | Authors',
+          payload: authors,
+        };
+      }
+    } else {
+      return res.status(302).redirect('/pages/error');
+    }
+  }
+
+  @Get('pages/error')
+  @Render('404.hbs')
+  async errorPage() {
+    return;
+  }
 
   @Get('books')
   async getBooks(): Promise<ParsedData<Books[]>> {
@@ -25,6 +103,11 @@ export class AppController {
   @Get('magazines')
   async getMagazines(): Promise<ParsedData<Magazines[]>> {
     return await this.appService.getMagazines();
+  }
+
+  @Get('authors')
+  async getAuthors(): Promise<ParsedData<Authors[]>> {
+    return await this.appService.getAuthors();
   }
 
   @Get('books/:isbn')

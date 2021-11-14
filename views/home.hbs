@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    {{>header title=title style="../../public/css/style.css" iconPath="../../public/images/favicon.png"}}
+    <body class="font-body">
+      <div>
+        <nav class="bg-white">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 mt-13">
+                  <img class="h-8 w-8" src="../../public/images/favicon.png"
+                    alt="Workflow">
+                </div>
+                <div class="hidden md:block">
+                  <div class="menu flex ml-10" id="myDIV">
+                    <div id="currentPageId" class="dropdown-content">{{pageId}}</div>
+                    <a href="/pages/home/Books" class="btn text-gray-nav-gray hover:text-gray-blue px-5 py-2 rounded-md text-base font-medium">Books</a>
+                    <a href="/pages/home/Magazines" class="btn text-gray-nav-gray hover:text-gray-blue px-5 py-2 rounded-md text-base font-medium">Magazines</a>
+                    <a href="/pages/home/Authors" class="btn text-gray-nav-gray hover:text-gray-blue px-5 py-2 rounded-md text-base font-medium">Authors</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+            {{#ifEquals pageId "Books"}}
+              {{>books}}
+            {{/ifEquals}}
+            {{#ifEquals pageId "Magazines"}}
+              {{>magazines}}
+            {{/ifEquals}}
+            {{#ifEquals pageId "Authors"}}
+              {{>authors}}
+            {{/ifEquals}}
+            {{#ifEquals pageId "Works"}}
+              {{>authorWorks}}
+            {{/ifEquals}}
+        </div>
+    </body>
+    <script>
+        var header = document.getElementById("myDIV");
+        var btns = header.getElementsByClassName("btn");
+        var pageId=document.getElementById("currentPageId");
+        for (var i = 0; i < btns.length; i++) {
+          if (btns[i].innerText===pageId.innerText) {
+            btns[i].className +=" active";
+          }else{
+            btns[i].className.replace(" active", "");
+          }
+        }
+    </script>
+</html>

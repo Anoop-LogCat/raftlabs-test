@@ -27,6 +27,13 @@ export class AppService {
     return await this.csvParser.parse(readStream, Magazines);
   }
 
+  async getAuthors(): Promise<ParsedData<Authors[]>> {
+    const readStream = fs.createReadStream(
+      join(__dirname, '..', 'src/data/authors.csv'),
+    );
+    return await this.csvParser.parse(readStream, Authors);
+  }
+
   async getBookByISBN(isbn: string): Promise<Books[]> {
     const readStream = fs.createReadStream(
       join(__dirname, '..', 'src/data/books.csv'),
