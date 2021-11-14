@@ -55,35 +55,35 @@ export class AppController {
   @Render('home.hbs')
   async homePage(@Param('pageId') pageId: string, @Res() res, @Query() query) {
     if (pageId === 'Books') {
-      const books = (await this.appService.getBooks()).list;
+      const books =
+        query.search !== undefined
+          ? await this.appService.getBookByISBN(query.search)
+          : (await this.appService.getBooks()).list;
       return {
         pageId,
         title: 'Home | Books',
         payload: books,
       };
     } else if (pageId === 'Magazines') {
-      const magazines = (await this.appService.getMagazines()).list;
+      const magazines =
+        query.search !== undefined
+          ? await this.appService.getMagazineByISBN(query.search)
+          : (await this.appService.getMagazines()).list;
       return {
         pageId,
         title: 'Home | Magazines',
         payload: magazines,
       };
     } else if (pageId === 'Authors') {
-      if (query.email !== undefined) {
-        const works = await this.appService.getWorksByAuthor(query.email);
-        return {
-          pageId: 'Works',
-          title: 'Author Works',
-          payload: works,
-        };
-      } else {
-        const authors = (await this.appService.getAuthors()).list;
-        return {
-          pageId,
-          title: 'Home | Authors',
-          payload: authors,
-        };
-      }
+      const response =
+        query.email !== undefined
+          ? await this.appService.getWorksByAuthor(query.email)
+          : (await this.appService.getAuthors()).list;
+      return {
+        pageId: query.email !== undefined ? 'Works' : 'Authors',
+        title: 'Home | Authors',
+        payload: response,
+      };
     } else {
       return res.status(302).redirect('/pages/error');
     }
