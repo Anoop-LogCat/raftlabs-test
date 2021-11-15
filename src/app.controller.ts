@@ -56,9 +56,9 @@ export class AppController {
   async homePage(@Param('pageId') pageId: string, @Res() res, @Query() query) {
     if (pageId === 'Books') {
       const books =
-        query.search !== undefined
-          ? await this.appService.getBookByISBN(query.search)
-          : (await this.appService.getBooks()).list;
+        query.search === undefined
+          ? (await this.appService.getBooks()).list
+          : await this.appService.getBookByISBN(query.search);
       return {
         pageId,
         title: 'Home | Books',
@@ -66,9 +66,9 @@ export class AppController {
       };
     } else if (pageId === 'Magazines') {
       const magazines =
-        query.search !== undefined
-          ? await this.appService.getMagazineByISBN(query.search)
-          : (await this.appService.getMagazines()).list;
+        query.search === undefined
+          ? (await this.appService.getMagazines()).list
+          : await this.appService.getMagazineByISBN(query.search);
       return {
         pageId,
         title: 'Home | Magazines',
@@ -76,11 +76,11 @@ export class AppController {
       };
     } else if (pageId === 'Authors') {
       const response =
-        query.email !== undefined
-          ? await this.appService.getWorksByAuthor(query.email)
-          : (await this.appService.getAuthors()).list;
+        query.email === undefined
+          ? (await this.appService.getAuthors()).list
+          : await this.appService.getWorksByAuthor(query.email);
       return {
-        pageId: query.email !== undefined ? 'Works' : 'Authors',
+        pageId: query.email === undefined ? 'Authors' : 'Works',
         title: 'Home | Authors',
         payload: response,
       };
