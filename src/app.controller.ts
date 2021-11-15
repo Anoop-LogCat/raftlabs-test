@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Param,
   Post,
   Query,
@@ -21,6 +22,8 @@ import { partialConversion } from './utils/partial-converison.util';
 
 @Controller()
 export class AppController {
+  private logger = new Logger(AppController.name);
+
   constructor(private readonly appService: AppService) {
     const path = join(__dirname, '..', 'views');
     Handlebars.registerPartial('header', partialConversion(path, 'header.hbs'));
@@ -55,30 +58,36 @@ export class AppController {
   @Render('home.hbs')
   async homePage(@Param('pageId') pageId: string, @Res() res, @Query() query) {
     if (pageId === 'Books') {
+      this.logger.log(`search value : ${query.search}`);
       const books =
         query.search === undefined
           ? (await this.appService.getBooks()).list
           : await this.appService.getBookByISBN(query.search);
+      this.logger.log(`Books Data : ${JSON.stringify(books)}`);
       return {
         pageId,
         title: 'Home | Books',
         payload: books,
       };
     } else if (pageId === 'Magazines') {
+      this.logger.log(`search value : ${query.search}`);
       const magazines =
         query.search === undefined
           ? (await this.appService.getMagazines()).list
           : await this.appService.getMagazineByISBN(query.search);
+      this.logger.log(`Magazine Data : ${JSON.stringify(magazines)}`);
       return {
         pageId,
         title: 'Home | Magazines',
         payload: magazines,
       };
     } else if (pageId === 'Authors') {
+      this.logger.log(`author Data : ${query.email}`);
       const response =
         query.email === undefined
           ? (await this.appService.getAuthors()).list
           : await this.appService.getWorksByAuthor(query.email);
+      this.logger.log(`author Data : ${JSON.stringify(response)}`);
       return {
         pageId: query.email === undefined ? 'Authors' : 'Works',
         title: 'Home | Authors',
