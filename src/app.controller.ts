@@ -55,34 +55,46 @@ export class AppController {
   @Render('home.hbs')
   async homePage(@Param('pageId') pageId: string, @Res() res, @Query() query) {
     if (pageId === 'Books') {
-      const books =
-        query.search === undefined
-          ? (await this.appService.getBooks()).list
-          : await this.appService.getBookByISBN(query.search);
+      const books = (await this.appService.getBooks()).list;
+      return {
+        pageId,
+        title: 'Home | Books',
+        payload: books,
+      };
+    } else if (pageId === 'Books-search') {
+      const books = await this.appService.getBookByISBN(query.search);
       return {
         pageId,
         title: 'Home | Books',
         payload: books,
       };
     } else if (pageId === 'Magazines') {
-      const magazines =
-        query.search === undefined
-          ? (await this.appService.getMagazines()).list
-          : await this.appService.getMagazineByISBN(query.search);
+      const magazines = (await this.appService.getMagazines()).list;
+      return {
+        pageId,
+        title: 'Home | Magazines',
+        payload: magazines,
+      };
+    } else if (pageId === 'Magazines-search') {
+      const magazines = await this.appService.getMagazineByISBN(query.search);
       return {
         pageId,
         title: 'Home | Magazines',
         payload: magazines,
       };
     } else if (pageId === 'Authors') {
-      const response =
-        query.email === undefined
-          ? (await this.appService.getAuthors()).list
-          : await this.appService.getWorksByAuthor(query.email);
+      const authors = (await this.appService.getAuthors()).list;
       return {
-        pageId: query.email === undefined ? 'Authors' : 'Works',
+        pageId,
         title: 'Home | Authors',
-        payload: response,
+        payload: authors,
+      };
+    } else if (pageId === 'Authors-works') {
+      const works = await this.appService.getWorksByAuthor(query.email);
+      return {
+        pageId,
+        title: 'Home | Author Works',
+        payload: works,
       };
     } else {
       return res.status(302).redirect('/pages/error');
